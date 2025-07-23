@@ -1,0 +1,30 @@
+{
+    "name": "QuickAction",
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "A short title for the canned response (e.g., 'Refund Policy')."
+      },
+      "content": {
+        "type": "string",
+        "description": "The full canned response text."
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Tags for organizing quick actions (e.g., Billing, Shipping)."
+      },
+      "usage_count": {
+        "type": "number",
+        "default": 0,
+        "description": "How many times this quick action has been used."
+      }
+    },
+    "required": [
+      "title",
+      "content"
+    ]
+  }
