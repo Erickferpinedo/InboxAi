@@ -3,26 +3,32 @@ import { Settings as SettingsIcon, Bell, Shield, Palette } from 'lucide-react';
 
 export default function Settings() {
   return (
-    <div className="h-full w-full flex flex-col bg-slate-50">
-      <header className="sticky top-0 bg-white/80 backdrop-blur-lg z-5 border-b border-slate-200/80 px-4 pt-4 pb-3">
-        <div className="flex items-center gap-2">
-            <SettingsIcon className="w-8 h-8 text-slate-600"/>
-            <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
+    <div className="d-flex flex-column min-vh-100 bg-body-tertiary">
+      <header className="sticky-top bg-white bg-opacity-95 border-bottom px-4 pt-4 pb-3" style={{ zIndex: 10 }}>
+        <div className="d-flex align-items-center gap-2 mb-1">
+          <SettingsIcon size={32} className="text-secondary" />
+          <h1 className="h3 fw-bold text-dark m-0">Settings</h1>
         </div>
-        <p className="text-slate-500 mt-1">Manage your account and preferences.</p>
+        <p className="text-secondary mb-0" style={{ fontSize: '1rem' }}>
+          Manage your account and preferences.
+        </p>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <div className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase text-slate-400">Account</h2>
-            <div className="bg-white rounded-lg shadow-sm p-4">Profile</div>
-            <div className="bg-white rounded-lg shadow-sm p-4">Integrations</div>
+      <div className="flex-grow-1 overflow-auto p-4">
+        <div className="mb-4">
+          <h2 className="text-uppercase text-secondary-emphasis fs-6 fw-semibold mb-2" style={{ letterSpacing: 1 }}>
+            Account
+          </h2>
+          <div className="bg-white rounded-4 shadow-sm p-4 mb-2">Profile</div>
+          <div className="bg-white rounded-4 shadow-sm p-4 mb-2">Integrations</div>
         </div>
-         <div className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase text-slate-400">Preferences</h2>
-            <div className="bg-white rounded-lg shadow-sm p-4">Notifications</div>
-            <div className="bg-white rounded-lg shadow-sm p-4">Appearance</div>
-            <div className="bg-white rounded-lg shadow-sm p-4">Privacy</div>
+        <div>
+          <h2 className="text-uppercase text-secondary-emphasis fs-6 fw-semibold mb-2" style={{ letterSpacing: 1 }}>
+            Preferences
+          </h2>
+          <div className="bg-white rounded-4 shadow-sm p-4 mb-2">Notifications</div>
+          <div className="bg-white rounded-4 shadow-sm p-4 mb-2">Appearance</div>
+          <div className="bg-white rounded-4 shadow-sm p-4 mb-2">Privacy</div>
         </div>
       </div>
     </div>

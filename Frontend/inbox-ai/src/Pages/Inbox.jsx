@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Message } from '@/entities/Message';
+import { Message } from "../Entities/Message";
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, ChevronDown } from 'lucide-react';
 
-import InboxCard from '../components/inbox/InboxCard';
-import ThreadView from '../components/inbox/ThreadView';
+import InboxCard from '../Components/Inbox/InboxCard';
+import ThreadView from '../Components/Inbox/ThreadView';
 
 export default function Inbox() {
   const [messages, setMessages] = useState([]);
@@ -12,9 +12,11 @@ export default function Inbox() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [sortOrder, setSortOrder] = useState('Newest');
   const [selectedThreadId, setSelectedThreadId] = useState(null);
+  const [showSort, setShowSort] = useState(false);
 
   useEffect(() => {
     loadMessages();
+    // eslint-disable-next-line
   }, []);
 
   const loadMessages = async () => {
@@ -23,7 +25,7 @@ export default function Inbox() {
     setMessages(data);
     setIsLoading(false);
   };
-  
+
   const handleSelectThread = (threadId) => {
     setSelectedThreadId(threadId);
   };
@@ -32,27 +34,36 @@ export default function Inbox() {
     setSelectedThreadId(null);
     loadMessages(); // Refresh inbox on close
   };
-  
+
+  const filters = ['All', 'Gmail', 'WhatsApp', 'Slack'];
+  const sortOptions = ['Newest', 'Urgent', 'Awaiting Reply'];
+
   const filteredMessages = messages
     .filter(m => activeFilter === 'All' || m.platform === activeFilter.toLowerCase())
     .sort((a, b) => {
-        if (sortOrder === 'Urgent' && a.tags?.includes('Urgent') !== b.tags?.includes('Urgent')) {
-            return a.tags?.includes('Urgent') ? -1 : 1;
-        }
-        if (sortOrder === 'Awaiting Reply' && a.is_awaiting_reply !== b.is_awaiting_reply) {
-            return a.is_awaiting_reply ? -1 : 1;
-        }
-        return new Date(b.created_date) - new Date(a.created_date);
+      if (sortOrder === 'Urgent' && a.tags?.includes('Urgent') !== b.tags?.includes('Urgent')) {
+        return a.tags?.includes('Urgent') ? -1 : 1;
+      }
+      if (sortOrder === 'Awaiting Reply' && a.is_awaiting_reply !== b.is_awaiting_reply) {
+        return a.is_awaiting_reply ? -1 : 1;
+      }
+      return new Date(b.created_date) - new Date(a.created_date);
     })
-    .filter((v, i, a) => a.findIndex(t => (t.thread_id === v.thread_id)) === i); // Get unique threads
+    .filter((v, i, a) => a.findIndex(t => (t.thread_id === v.thread_id)) === i); // Unique threads
 
   return (
-    <div className="h-full w-full flex flex-col bg-slate-50">
+    <div className="d-flex flex-column min-vh-100 bg-body-tertiary position-relative">
+      {/* ThreadView Overlay */}
       <AnimatePresence>
         {selectedThreadId && (
           <motion.div
             key="thread-view"
-            className="absolute inset-0 z-10 bg-white"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 1055, // Higher than normal content, lower than modal
+              background: 'rgba(255,255,255,1)'
+            }}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -67,40 +78,82 @@ export default function Inbox() {
       </AnimatePresence>
 
       {/* Header */}
-      <header className="sticky top-0 bg-white/80 backdrop-blur-lg z-5 border-b border-slate-200/80 px-4 pt-4">
-        <h1 className="text-3xl font-bold text-slate-900 mb-4">Inbox</h1>
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2.5"
-          />
+      <div className="sticky-top bg-white bg-opacity-95 border-bottom px-4 pt-4 pb-2" style={{ zIndex: 10 }}>
+        <h1 className="h4 fw-bold text-dark mb-4">Inbox</h1>
+        {/* Search Bar */}
+        <div className="mb-3">
+          <div className="input-group">
+            <span className="input-group-text bg-white border-end-0">
+              <Search size={18} color="#94A3B8" />
+            </span>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="form-control border-start-0"
+              // You can implement search here
+            />
+          </div>
         </div>
-        <div className="flex items-center justify-between pb-3">
-          <div className="flex gap-2">
-            {['All', 'Gmail', 'WhatsApp', 'Slack'].map(filter => (
+        {/* Filters & Sort */}
+        <div className="d-flex align-items-center justify-content-between pb-2">
+          <div className="d-flex gap-2">
+            {filters.map(filter => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-full ${
-                  activeFilter === filter ? 'bg-blue-600 text-white' : 'bg-white text-slate-600'
-                }`}
+                className={`btn btn-sm rounded-pill fw-semibold border 
+                  ${activeFilter === filter
+                    ? "btn-primary bg-primary text-white border-primary"
+                    : "btn-light bg-white border-secondary text-secondary"
+                  }`}
+                style={{ minWidth: 70 }}
               >
                 {filter}
               </button>
             ))}
           </div>
-          <button className="flex items-center gap-1 text-sm font-semibold text-slate-600">
-            {sortOrder} <ChevronDown className="w-4 h-4" />
-          </button>
+          {/* Sort Dropdown */}
+          <div className="position-relative">
+            <button
+              onClick={() => setShowSort(s => !s)}
+              className="btn btn-outline-secondary btn-sm d-flex align-items-center"
+              type="button"
+            >
+              {sortOrder}
+              <ChevronDown size={16} className="ms-1" />
+            </button>
+            {showSort && (
+              <div className="position-absolute end-0 mt-2 bg-white border rounded shadow-sm" style={{ minWidth: 150, zIndex: 1000 }}>
+                {sortOptions.map(option => (
+                  <button
+                    key={option}
+                    className={`dropdown-item text-start py-2 px-3 ${sortOrder === option ? 'active text-primary fw-bold' : ''}`}
+                    onClick={() => {
+                      setSortOrder(option);
+                      setShowSort(false);
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </header>
+      </div>
 
       {/* Message List */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-grow-1 overflow-auto p-4">
         {isLoading ? (
-          Array.from({ length: 5 }).map((_, i) => <InboxCard.Skeleton key={i} />)
+          <div className="d-flex flex-column gap-3">
+            {Array.from({ length: 5 }).map((_, i) =>
+              InboxCard.Skeleton ? (
+                <InboxCard.Skeleton key={i} />
+              ) : (
+                <div key={i} className="bg-white rounded-3 p-4 w-100 shadow-sm"></div>
+              )
+            )}
+          </div>
         ) : (
           <AnimatePresence>
             {filteredMessages.map(message => (
@@ -121,6 +174,6 @@ export default function Inbox() {
           </AnimatePresence>
         )}
       </div>
-    </div>
-  );
+    </div>
+  );
 }

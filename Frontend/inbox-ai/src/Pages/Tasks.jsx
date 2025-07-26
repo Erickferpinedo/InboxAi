@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Task } from "@/entities/Task";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  CheckSquare, 
-  Clock, 
-  AlertCircle, 
-  Plus,
-  Calendar,
-  User,
-  MessageSquare
-} from "lucide-react";
+import { Task } from "../Entities/Task";
+import { CheckSquare, Clock, AlertCircle, Plus, Calendar, User, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
+
+// Map priority/status to Bootstrap colors
+const priorityColors = {
+  low: "bg-primary bg-opacity-10 text-primary",
+  medium: "bg-warning bg-opacity-10 text-warning",
+  high: "bg-orange bg-opacity-10 text-orange", // You may need to define .text-orange/.bg-orange in your CSS or use a close Bootstrap color
+  urgent: "bg-danger bg-opacity-10 text-danger",
+};
+const statusColors = {
+  todo: "bg-secondary bg-opacity-10 text-secondary",
+  in_progress: "bg-primary bg-opacity-10 text-primary",
+  completed: "bg-success bg-opacity-10 text-success",
+  cancelled: "bg-danger bg-opacity-10 text-danger",
+};
+const tabs = [
+  { key: "all", label: "All" },
+  { key: "todo", label: "To Do" },
+  { key: "in_progress", label: "In Progress" },
+  { key: "completed", label: "Completed" },
+];
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
@@ -23,6 +31,7 @@ export default function Tasks() {
 
   useEffect(() => {
     loadTasks();
+    // eslint-disable-next-line
   }, []);
 
   const loadTasks = async () => {
@@ -36,7 +45,7 @@ export default function Tasks() {
     setIsLoading(false);
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     switch (activeTab) {
       case "all":
         return true;
@@ -60,91 +69,72 @@ export default function Tasks() {
     }
   };
 
-  const priorityColors = {
-    low: "bg-blue-50 text-blue-600 border-blue-200",
-    medium: "bg-yellow-50 text-yellow-600 border-yellow-200",
-    high: "bg-orange-50 text-orange-600 border-orange-200",
-    urgent: "bg-red-50 text-red-600 border-red-200"
-  };
-
-  const statusColors = {
-    todo: "bg-slate-50 text-slate-600 border-slate-200",
-    in_progress: "bg-blue-50 text-blue-600 border-blue-200",
-    completed: "bg-green-50 text-green-600 border-green-200",
-    cancelled: "bg-red-50 text-red-600 border-red-200"
-  };
-
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <div className="min-vh-100 d-flex flex-column bg-body-tertiary">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 px-6 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center">
-              <CheckSquare className="w-5 h-5 text-white" />
+      <div className="border-bottom px-4 pt-4 pb-3 bg-white bg-opacity-95 sticky-top" style={{ zIndex: 10 }}>
+        <div className="d-flex align-items-center justify-content-between mb-3">
+          <div className="d-flex align-items-center gap-3">
+            <div className="rounded-4 bg-primary bg-gradient d-flex align-items-center justify-content-center shadow" style={{ width: 40, height: 40 }}>
+              <CheckSquare size={22} color="white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">Tasks</h1>
-              <p className="text-slate-500 mt-1">
+              <h2 className="h5 fw-bold text-dark mb-0">Tasks</h2>
+              <div className="text-secondary small mt-1">
                 {filteredTasks.length} tasks extracted from messages
-              </p>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-slate-200 hover:bg-slate-50"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Task
-            </Button>
-          </div>
+          <button
+            className="d-flex align-items-center gap-1 btn btn-outline-primary btn-sm fw-semibold"
+            onClick={() => {/* Add Task handler */}}
+            type="button"
+          >
+            <Plus size={16} />
+            Add Task
+          </button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white/60 backdrop-blur-sm">
-            <TabsTrigger value="all">
-              All ({tasks.length})
-            </TabsTrigger>
-            <TabsTrigger value="todo">
-              To Do ({tasks.filter(t => t.status === "todo").length})
-            </TabsTrigger>
-            <TabsTrigger value="in_progress">
-              In Progress ({tasks.filter(t => t.status === "in_progress").length})
-            </TabsTrigger>
-            <TabsTrigger value="completed">
-              Completed ({tasks.filter(t => t.status === "completed").length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Tabs */}
+        <div className="d-flex gap-2 mt-2">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              type="button"
+              className={`btn btn-sm fw-medium px-3 py-1 rounded-pill ${activeTab === tab.key ? "btn-primary" : "btn-outline-secondary"}`}
+              onClick={() => setActiveTab(tab.key)}
+            >
+              {tab.label}
+              {tab.key === "all" && ` (${tasks.length})`}
+              {tab.key === "todo" && ` (${tasks.filter(t => t.status === "todo").length})`}
+              {tab.key === "in_progress" && ` (${tasks.filter(t => t.status === "in_progress").length})`}
+              {tab.key === "completed" && ` (${tasks.filter(t => t.status === "completed").length})`}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Tasks List */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-grow-1 overflow-auto p-4">
         <AnimatePresence mode="wait">
           {isLoading ? (
-            <div className="grid gap-4">
+            <div className="mb-4">
               {Array(5).fill(0).map((_, i) => (
-                <Card key={i} className="bg-white/60 backdrop-blur-sm animate-pulse">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="h-4 bg-slate-200 rounded w-48 mb-2" />
-                        <div className="h-3 bg-slate-200 rounded w-32" />
-                      </div>
-                      <div className="h-6 bg-slate-200 rounded w-16" />
+                <div key={i} className="bg-white rounded-3 p-4 mb-3 shadow-sm" style={{ opacity: 0.5 }}>
+                  <div className="d-flex justify-content-between mb-2">
+                    <div>
+                      <div className="bg-secondary bg-opacity-25 rounded w-50 mb-2" style={{ height: 16 }}></div>
+                      <div className="bg-secondary bg-opacity-25 rounded w-25" style={{ height: 12 }}></div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-slate-200 rounded w-full mb-2" />
-                    <div className="h-4 bg-slate-200 rounded w-2/3" />
-                  </CardContent>
-                </Card>
+                    <div className="bg-secondary bg-opacity-25 rounded" style={{ width: 40, height: 24 }}></div>
+                  </div>
+                  <div className="bg-secondary bg-opacity-25 rounded w-100 mb-2" style={{ height: 16 }}></div>
+                  <div className="bg-secondary bg-opacity-25 rounded w-75" style={{ height: 16 }}></div>
+                </div>
               ))}
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div>
               {filteredTasks.map((task) => (
                 <motion.div
                   key={task.id}
@@ -153,86 +143,77 @@ export default function Tasks() {
                   exit={{ opacity: 0, y: -20 }}
                   whileHover={{ y: -2 }}
                 >
-                  <Card className="bg-white/60 backdrop-blur-sm border-white/20 shadow-sm hover:shadow-md transition-all duration-300">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <button
-                              onClick={() => handleStatusChange(task.id, 
+                  <div className="bg-white rounded-3 shadow-sm p-4 mb-3 border border-light">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div className="flex-grow-1">
+                        <div className="d-flex align-items-center gap-2 mb-2">
+                          <button
+                            onClick={() =>
+                              handleStatusChange(
+                                task.id,
                                 task.status === "completed" ? "todo" : "completed"
-                              )}
-                              className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                                task.status === "completed" 
-                                  ? "bg-green-500 border-green-500 text-white" 
-                                  : "border-slate-300 hover:border-green-500"
+                              )
+                            }
+                            className={`d-flex align-items-center justify-content-center rounded-circle border me-2
+                              ${task.status === "completed"
+                                ? "bg-success border-success text-white"
+                                : "bg-white border-secondary text-secondary"
                               }`}
-                            >
-                              {task.status === "completed" && (
-                                <CheckSquare className="w-3 h-3" />
-                              )}
-                            </button>
-                            <CardTitle className={`text-lg ${
-                              task.status === "completed" ? "line-through text-slate-500" : "text-slate-900"
-                            }`}>
-                              {task.title}
-                            </CardTitle>
-                          </div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge className={`text-xs px-2 py-1 ${priorityColors[task.priority]}`}>
-                              {task.priority}
-                            </Badge>
-                            <Badge className={`text-xs px-2 py-1 ${statusColors[task.status]}`}>
-                              {task.status.replace("_", " ")}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-slate-600 mb-2">
-                            {task.description}
-                          </p>
-                          <div className="flex items-center gap-4 text-xs text-slate-500">
-                            {task.due_date && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>Due {format(new Date(task.due_date), "MMM d")}</span>
-                              </div>
-                            )}
-                            {task.assignee && (
-                              <div className="flex items-center gap-1">
-                                <User className="w-3 h-3" />
-                                <span>{task.assignee}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-1">
-                              <MessageSquare className="w-3 h-3" />
-                              <span>From message</span>
-                            </div>
-                          </div>
+                            style={{ width: 28, height: 28 }}
+                          >
+                            {task.status === "completed" && <CheckSquare size={14} />}
+                          </button>
+                          <span className={`fw-bold fs-5 ${task.status === "completed" ? "text-decoration-line-through text-secondary" : "text-dark"}`}>
+                            {task.title}
+                          </span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {task.priority === "urgent" && (
-                            <AlertCircle className="w-4 h-4 text-red-500" />
+                        <div className="d-flex align-items-center gap-2 mb-2">
+                          <span className={`badge ${priorityColors[task.priority] || "bg-light text-secondary"} px-2 py-1 text-capitalize`}>
+                            {task.priority}
+                          </span>
+                          <span className={`badge ${statusColors[task.status] || "bg-light text-secondary"} px-2 py-1 text-capitalize`}>
+                            {task.status.replace("_", " ")}
+                          </span>
+                        </div>
+                        <div className="text-secondary mb-2">{task.description}</div>
+                        <div className="d-flex flex-wrap gap-3 small text-secondary">
+                          {task.due_date && (
+                            <span className="d-flex align-items-center gap-1">
+                              <Calendar size={12} />
+                              Due {format(new Date(task.due_date), "MMM d")}
+                            </span>
                           )}
-                          {task.status === "in_progress" && (
-                            <Clock className="w-4 h-4 text-blue-500" />
+                          {task.assignee && (
+                            <span className="d-flex align-items-center gap-1">
+                              <User size={12} />
+                              {task.assignee}
+                            </span>
                           )}
+                          <span className="d-flex align-items-center gap-1">
+                            <MessageSquare size={12} />
+                            From message
+                          </span>
                         </div>
                       </div>
-                    </CardHeader>
-                  </Card>
+                      <div className="d-flex flex-column align-items-end gap-2">
+                        {task.priority === "urgent" && <AlertCircle size={16} color="#F56565" />}
+                        {task.status === "in_progress" && <Clock size={16} color="#4299E1" />}
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               ))}
-              
               {filteredTasks.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckSquare className="w-8 h-8 text-slate-400" />
+                <div className="text-center py-5">
+                  <div className="mx-auto mb-3 rounded-circle bg-light d-flex align-items-center justify-content-center" style={{ width: 64, height: 64 }}>
+                    <CheckSquare size={32} color="#A0AEC0" />
                   </div>
-                  <h3 className="text-lg font-medium text-slate-900 mb-2">
+                  <h3 className="fw-bold text-dark mb-2 fs-5">
                     No tasks found
                   </h3>
-                  <p className="text-slate-500">
+                  <div className="text-secondary">
                     AI will automatically extract tasks from your messages.
-                  </p>
+                  </div>
                 </div>
               )}
             </div>

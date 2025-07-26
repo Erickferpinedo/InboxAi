@@ -8,27 +8,22 @@ import SmartReplies from './Pages/SmartReplies.jsx';
 import QuickActions from './Pages/QuickActions.jsx';
 import Tasks from './Pages/Tasks.jsx';
 import Threads from './Pages/Threads.jsx';
+import './index.css';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route
-          path="*"
-          element={
-            <Layout>
-              <Routes>
-                <Route path="/inbox" element={<Inbox />} />
-                <Route path="/drafts" element={<Drafts />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/smartreplies" element={<SmartReplies />} />
-                <Route path="/quickactions" element={<QuickActions />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/threads" element={<Threads />} />
-              </Routes>
-            </Layout>
-          }
-        />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Inbox />} /> {/* default to Inbox */}
+          <Route path="inbox" element={<Inbox />} />
+          <Route path="drafts" element={<Drafts />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="smartreplies" element={<SmartReplies />} />
+          <Route path="quickactions" element={<QuickActions />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="threads" element={<Threads />} />
+        </Route>
       </Routes>
     </Router>
   );

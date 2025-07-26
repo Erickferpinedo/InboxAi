@@ -1,36 +1,18 @@
 import React from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Mail, 
-  MessageSquare, 
-  Star, 
-  AlertCircle,
-  Reply,
-  Inbox
-} from "lucide-react";
+import { Mail, MessageSquare, Star, AlertCircle, Reply, Inbox } from "lucide-react";
 
 export default function MessageFilters({ activeFilter, onFilterChange, messages }) {
   const getFilterCount = (filter) => {
     switch (filter) {
-      case "all":
-        return messages.length;
-      case "unread":
-        return messages.filter(m => !m.is_read).length;
-      case "starred":
-        return messages.filter(m => m.is_starred).length;
-      case "urgent":
-        return messages.filter(m => m.is_urgent).length;
-      case "needs_reply":
-        return messages.filter(m => m.needs_reply).length;
-      case "gmail":
-        return messages.filter(m => m.platform === "gmail").length;
-      case "slack":
-        return messages.filter(m => m.platform === "slack").length;
-      case "linkedin":
-        return messages.filter(m => m.platform === "linkedin").length;
-      default:
-        return 0;
+      case "all":         return messages.length;
+      case "unread":      return messages.filter(m => !m.is_read).length;
+      case "starred":     return messages.filter(m => m.is_starred).length;
+      case "urgent":      return messages.filter(m => m.is_urgent).length;
+      case "needs_reply": return messages.filter(m => m.needs_reply).length;
+      case "gmail":       return messages.filter(m => m.platform === "gmail").length;
+      case "slack":       return messages.filter(m => m.platform === "slack").length;
+      case "linkedin":    return messages.filter(m => m.platform === "linkedin").length;
+      default: return 0;
     }
   };
 
@@ -46,33 +28,39 @@ export default function MessageFilters({ activeFilter, onFilterChange, messages 
   ];
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="d-flex flex-wrap gap-2 my-2">
       {filters.map((filter) => {
         const count = getFilterCount(filter.id);
         const Icon = filter.icon;
-        
+        const isActive = activeFilter === filter.id;
         return (
           <button
             key={filter.id}
+            type="button"
             onClick={() => onFilterChange(filter.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-              activeFilter === filter.id
-                ? "bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg"
-                : "bg-white/60 text-slate-600 hover:bg-white/80 hover:text-slate-900"
-            }`}
+            className={`btn d-flex align-items-center gap-2 py-1 px-3 rounded-pill border
+              ${isActive 
+                ? "btn-primary text-white shadow-sm"
+                : "btn-outline-secondary bg-white text-secondary"
+              }`}
+            style={{
+              fontWeight: 500,
+              fontSize: "0.98rem",
+              transition: "all 0.12s"
+            }}
           >
-            <Icon className="w-4 h-4" />
+            <Icon size={16} />
             <span>{filter.label}</span>
             {count > 0 && (
-              <Badge 
-                className={`text-xs px-2 py-1 ${
-                  activeFilter === filter.id 
-                    ? "bg-white/20 text-white" 
-                    : "bg-slate-100 text-slate-600"
+              <span className={`badge rounded-pill ms-1
+                ${isActive 
+                  ? "bg-light text-primary" 
+                  : "bg-secondary-subtle text-secondary"
                 }`}
+                style={{fontSize: "0.78em", fontWeight: 600}}
               >
                 {count}
-              </Badge>
+              </span>
             )}
           </button>
         );
